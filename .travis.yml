@@ -1,0 +1,23 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t w1shmast0ur/udemy-react-test -f ./client/Dockerfile.dev ./client
+  
+script:
+  - docker run w1shmast0ur/udemy-react-test npm run test -- --coverage
+
+after_success:
+  - docker build -t w1shmast0ur/udemy-multi-docker-client ./client
+  - docker build -t w1shmast0ur/udemy-multi-docker-nginx ./nginx
+  - docker build -t w1shmast0ur/udemy-multi-docker-server ./server
+  - docker build -t w1shmast0ur/udemy-multi-docker-worker ./worker
+  # login to the docker CLI
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  # Take images and push them to docker hub
+  - docker push w1shmast0ur/udemy-multi-docker-client 
+  - docker push w1shmast0ur/udemy-multi-docker-nginx
+  - docker push w1shmast0ur/udemy-multi-docker-server
+  - docker push w1shmast0ur/udemy-multi-docker-worker
+
